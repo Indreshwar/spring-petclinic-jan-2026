@@ -3,12 +3,12 @@ FROM eclipse-temurin:17-jre-alpine
 #LABEL is used to pass metadata
 LABEL Project="SPC"
 LABEL Author="indershwar"
-#WORKDIR is like cd command in linux (on which path it needs to be)
-WORKDIR /usr/share/spc
 #RUN is used to execute the command while mage is building
 RUN adduser -D -h /usr/home/spc -s /bin/sh
 #USER is to set to specific user 
 USER spc
+#WORKDIR is like cd command in linux (on which path it needs to be)
+WORKDIR /usr/share/spc
 #ADD is used to copy files from local into the image
 ADD target/spring-petclincic-4.0.0-SNAPSHOT.jar /usr/share/spc/spring-petclinic-4.0.0-SNAPSHOT.jar
 #EXPOSE is used to describe on which port the application is listening
