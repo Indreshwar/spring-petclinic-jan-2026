@@ -1,18 +1,17 @@
-#FROM instruction used for base image
+#First stage to build the maven package
+FROM maven:3.9-eclipse-temurin-17 AS build
+ADD . /app
+WORKDIR /app
+RUN mvn package
+
+#second stage to run the application
 FROM eclipse-temurin:17-jre-alpine
-#LABEL is used to pass metadata
-LABEL Project="SPC"
-LABEL Author="indershwar"
-#RUN is used to execute the command while mage is building
-RUN adduser -D -h /usr/home/spc -s /bin/sh
-#USER is to set to specific user 
+LABEL project="petclinic"
+LABEL Author="Indra"
+RUN adduser -D -h /usr/share/spc -s /bin/sh spc
 USER spc
-#WORKDIR is like cd command in linux (on which path it needs to be)
 WORKDIR /usr/share/spc
-#ADD is used to copy files from local into the image
-ADD target/spring-petclincic-4.0.0-SNAPSHOT.jar /usr/share/spc/spring-petclinic-4.0.0-SNAPSHOT.jar
-#EXPOSE is used to describe on which port the application is listening
+COPY --from=build /app/target/spring-petclinic-4.0.0-SNAPSHOT.jar spring-petclinic-4.0.0-SNAPSHOT.jar
 EXPOSE 8080
-#CMD  instruction sets the command to be executed when running a container from an image.
-CMD ["java","jar","/usr/share/spc/spring-petclinic-4.0.0-SNAPSHOT.jar"]
+CMD ["java","-jar","spring-petclinic-4.0.0-SNAPSHOT.jar"]
 
