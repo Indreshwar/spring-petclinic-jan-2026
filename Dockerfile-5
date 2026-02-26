@@ -1,0 +1,7 @@
+FROM maven:3.9-eclipse-temurin-17
+ADD . /app
+WORKDIR /app
+RUN mvn package
+EXPOSE 8080
+CMD ["java","-jar","/app/target/spring-petclinic-4.0.0-SNAPSHOT.jar"]
+
