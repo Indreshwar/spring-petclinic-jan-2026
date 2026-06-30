@@ -1,7 +1,6 @@
 .git/
 .git*
 k8s/
-target/
 **/Dockerfile
 **/docker-compose.yml
 
