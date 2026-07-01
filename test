@@ -1,3 +1,3 @@
 hi hello welcome as we are testing webhook fot git push in jenkins and building docker image and running application as  docker container
 we need mount the /var/run/docker.sock to container and docker cli also need to be installed in jenkins container to excute and need to add group to jenkins container by using docker container run --group-add 986
-testing cro job at 8:50 PM ist
+testing cro job at 8:56 PM ist
