@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven-3.9'
+    }
+    stages{
+        stage('source code'){
+            steps{
+                git branch: 'main',
+                    url: 'https://github.com/Indreshwar/spring-petclinic-jan-2026.git'
+            }
+        }
+        stage('Check Maven'){
+            steps {
+                sh 'mvn -version'
+            }
+        }
+        stage('build the code'){
+            steps{
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+        stage('build the docker image'){
+            steps{
+                sh 'docker image build -t spring-petclinic -f Dockerfile1 .'
+            }
+        }
+        stage('Run the docker container'){
+            steps{
+                sh 'docker container run -d --name pet-clinic -p 8080:8080 spring-petclinic:latest'
+            }
+        }
+        stage('verify container running'){
+            steps{
+                sh 'docker ps'
+                sh 'docker logs pet-clinic'
+            }
+        }
+        stage('Archiving the artifacts'){
+            steps{
+                archiveArtifacts artifacts: 'target/*.jar'
+            }
+        }
+    }
+}
