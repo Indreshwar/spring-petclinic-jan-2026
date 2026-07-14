@@ -49,11 +49,12 @@ pipeline {
                 archiveArtifacts artifacts: 'target/*.jar'
             }
         }
-        #post successful build
+   }
+        #post successful build shouldbe out of stages
         post {
             success {
                 echo 'Pipeline excuted successfully.'
             }
        }
-    }
+    
 }
