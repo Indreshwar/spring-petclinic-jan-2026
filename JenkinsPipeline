@@ -1,0 +1,59 @@
+#decalarative pipeline always begin with pipeline
+pipeline {
+    agent any #any available agent will run the pipeline
+    #as we have installed maven-3.9 in jenkins so using tools
+    tools {
+        maven 'Maven-3.9'
+    }
+    #Start with with stages
+    stages{
+        #stage for cloning the github 
+        stage('Source code'){
+           steps {
+                git branch: 'main',
+                    url: 'https://github.com/Indreshwar/spring-petclinic-jan-2026.git'
+           }
+        }
+        #stage for checking maven version
+        stage('check maven version'){
+            steps{
+                sh 'mvn -version'
+            }
+        }
+        #stage for building the code
+        stage('Build and package'){
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+        #stage for docker image build and remove the old container with name pet
+        stage('docker image build'){
+            steps{
+                sh 'docker image build -t spring_petclinic -f Dockerfile_test .'
+                sh 'docker container rm -f  pet'
+            }
+        }
+        stage('run the app in container'){
+            steps{
+                sh 'docker container run -d --name pet -p 8081:8080 spring_petclinic'
+            }
+        }
+        stage('verfiy the container is running'){
+            steps{
+                sh 'docker ps'
+                sh 'docker logs pet'
+            }
+        }
+        stage('Archive the artifacts'){
+            steps{
+                archiveArtifacts artifacts: 'target/*.jar'
+            }
+        }
+        #post successful build
+        post{
+            success{
+                echo 'Pipeline excuted successfully.'
+            }
+       }
+    }
+}
