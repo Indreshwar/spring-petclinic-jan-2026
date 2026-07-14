@@ -50,8 +50,8 @@ pipeline {
             }
         }
         #post successful build
-        post{
-            success{
+        post {
+            success {
                 echo 'Pipeline excuted successfully.'
             }
        }
