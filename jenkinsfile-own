@@ -1,0 +1,40 @@
+pipeline {
+    agent {
+        label 'JDK-21'
+    }
+    tools{
+        maven 'Maven-3.9'
+    }
+    triggers{
+        pollSCM('* * * * 7')
+    }
+    stages{
+        stage('Git-clone'){
+            steps {
+                git url: 'https://github.com/Indreshwar/spring-petclinic-jan-2026.git',
+                    branch: 'main'
+            }
+        }
+        stage('checks the maven version'){
+            steps {
+                 sh 'mvn -version'
+            }
+        }
+        stage('build and package'){
+            steps{
+                sh 'mvn clean package -DskipTests'
+            }
+            post{
+                success{
+                    archiveArtifacts artifacts: 'target/*.jar'
+                }
+            }
+        }
+        stage('check build successful') {
+            steps{
+                echo "build successful"
+            }
+        }
+        
+    }
+}
