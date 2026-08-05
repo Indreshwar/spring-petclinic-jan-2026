@@ -1,0 +1,68 @@
+pipeline{
+    agent {
+        label 'JDK-21'
+    }
+    tools {
+        maven 'Maven-3.9'
+    }
+    environment{
+        SCANNER_HOME=tool('sonar-scanner')
+    }
+    stages{
+        stage('git clone'){
+            steps{
+                git url: 'https://github.com/Indreshwar/spring-petclinic-jan-2026.git',
+                    branch: 'main'
+            }
+        }
+        stage('clean workspace'){
+            steps{
+                sh  '''
+                rm -rf .scannerwork
+                mvn clean
+                '''
+                
+            }
+        }
+        stage('compile'){
+            steps{
+                sh 'mvn compile'
+            }
+        }
+        stage('test -it generate the code coverage'){
+            steps{
+                sh 'mvn test'
+            }
+        }
+        stage('sonarqube analysis'){
+            steps{
+                withSonarQubeEnv('SONAR-docker'){
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=spring-petclinic \
+                                                           -Dsonar.projectKey=petclinic \
+                                                           -Dsonar.java.binaries=target/classes '''
+                }
+            }
+        }
+        stage('build & package'){
+            steps{
+                sh '''
+                   rm -rf .scannerwork
+                mvn clean package
+                '''
+            }
+            post{
+                success{
+                    archiveArtifacts artifacts: 'target/*.jar'
+            }
+            }
+        }
+    }
+    post{
+        success{
+            echo "build successful"
+        }
+        failure{
+            echo "failed"
+        }
+    }
+}
