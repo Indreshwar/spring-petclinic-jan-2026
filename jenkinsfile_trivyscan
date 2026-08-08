@@ -1,0 +1,77 @@
+pipeline {
+    agent {
+        label 'JDK-25'
+    }
+    tools {
+        maven 'Maven-3.9'
+    }
+    environment{
+        SONAR_SCANNER=tool('SONAR')
+    }
+    stages{
+        stage('git clone'){
+            steps{
+                git url: 'https://github.com/Indreshwar/spring-petclinic-jan-2026.git',
+                    branch: 'main'
+            }
+        }
+        stage('clean'){
+            steps{
+                sh '''
+                   rm -rf .scannerwork
+                   mvn clean '''
+            }
+        }
+        stage('compile'){
+            steps{
+                sh 'mvn compile'
+            }
+        }
+        stage('test'){
+            steps{
+                sh 'mvn test'
+            }
+        }
+        stage('sonarqube analysis'){
+            steps{
+                withSonarQubeEnv('SONAR_LATEST'){
+                    sh ''' $SONAR_SCANNER/bin/sonar-scanner -Dsonar.projectName=petclinic \
+                                                            -Dsonar.projectKey=spc \
+                                                            -Dsonar.java.binaries=target/classes '''
+                }
+            }
+        }
+        stage('Quality gates check'){
+            steps{
+                script{
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar_jenkins'
+                }
+            }
+        }
+        stage('build app'){
+            steps{
+                sh ''' 
+                    rm -rf .scannerwork 
+                    mvn clean package '''
+            }
+            post{
+                success{
+                    archiveArtifacts artifacts: 'target/*.jar'
+                }
+            }
+        }
+        stage('trivy scan'){
+            steps{
+                sh 'trivy fs --format table -o trivy.txt .'
+            }
+        }
+    }
+    post{
+    success{
+        echo "build successful"
+    }
+    failure{
+        echo "build failed"
+    }
+}
+}
